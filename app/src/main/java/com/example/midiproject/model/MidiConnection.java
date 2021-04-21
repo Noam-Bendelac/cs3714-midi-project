@@ -41,7 +41,8 @@ public class MidiConnection {
   // reference to midi manager
   private final MidiManager m;
   
-  
+  // reference to internal midi synth "device"
+  private final MidiPlayer mInternalPlayer;
   
   
   // livedata to notify whether an external midi device is available to connect to. value never null
@@ -86,6 +87,8 @@ public class MidiConnection {
     
     // getting application context from ctx might be a better practice than just using ctx
     m = (MidiManager)ctx.getApplicationContext().getSystemService(Context.MIDI_SERVICE);
+  
+    mInternalPlayer = new MidiPlayer(ctx);
     
     // initialize state
     onDeviceInfosChanged();
@@ -227,20 +230,39 @@ public class MidiConnection {
    */
   public void sendNoteOn(int pitch, int velocity) {
     if (mDeviceSelection.getValue() == DeviceSelection.INTERNAL) {
-      // TODO play internal synth
-    } else if (mDevice != null && mDevice.mPort != null) {
+      // play internal synth
+      mInternalPlayer.noteOn(pitch, velocity);
+    } else {
+      // selection is EXTERNAL
+      sendExternalNoteMessage(pitch, velocity);
+    }
+  }
+  
+  public void sendNoteOff(int pitch) {
+    if (mDeviceSelection.getValue() == DeviceSelection.INTERNAL) {
+      // play internal synth
+      mInternalPlayer.noteOff(pitch);
+    } else {
+      // selection is EXTERNAL
+      sendExternalNoteMessage(pitch, NOTE_OFF_VELOCITY);
+    }
+  }
+  
+  
+  private void sendExternalNoteMessage(int pitch, int velocity) {
+    if (mDevice != null && mDevice.mPort != null) {
       // selection is EXTERNAL and port is available
-      
+    
       byte[] buffer = new byte[4];
       int numBytes = 0;
-      
+    
       // hardcoded channel for now
       // MIDI channels 1-16 are encoded as 0-15.
       int channel = 1;
       buffer[numBytes++] = (byte)(NOTE_ON_STATUS + (channel - 1)); // note on
       buffer[numBytes++] = (byte)pitch;
       buffer[numBytes++] = (byte)velocity;
-      
+    
       int offset = 0;
       // post is non-blocking
       try {
@@ -249,10 +271,6 @@ public class MidiConnection {
         Log.e("send midi", Arrays.toString(e.getStackTrace()));
       }
     }
-  }
-  
-  public void sendNoteOff(int pitch) {
-    sendNoteOn(pitch, NOTE_OFF_VELOCITY);
   }
   
   
