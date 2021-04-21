@@ -12,14 +12,12 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.midiproject.BuildConfig;
-
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -39,129 +37,176 @@ public class MidiConnection {
   }
   
   
-  // livedata to hold list of connected device infos
-  // mutable list. never null?
-  // TODO initialize with empty list?
-  private final MutableLiveData<List<MidiDeviceInfo>> mInfos = new MutableLiveData<>();
+  
+  // reference to midi manager
+  private final MidiManager m;
   
   
-  // livedata to hold current device's info
-  // currInfo.value may be null
-  private final MutableLiveData<MidiDeviceInfo> mCurrInfo = new MutableLiveData<>(null);
   
-  // livedata to hold current opened device. derived from currInfo. value may be null
-  private final MutableLiveData<MidiDevice> mCurrDevice = new MutableLiveData<>(null);
   
-  // livedata to hold opened port. derived from currDevice. value may be null
-  private final MutableLiveData<MidiInputPort> mCurrInputPort = new MutableLiveData<>(null);
+  // livedata to notify whether an external midi device is available to connect to. value never null
+  // derived from m.getDevices()
+  private final MutableLiveData<Boolean> mExternalAvailable = new MutableLiveData<>(false);
+  
+  public LiveData<Boolean> getExternalAvailable() {
+    return mExternalAvailable;
+  }
+  
+  
+  // represents which device type is selected
+  public enum DeviceSelection {
+    // internal synth within the app
+    INTERNAL,
+    // external USB midi device
+    EXTERNAL,
+  }
+  
+  // livedata to hold which device type is selected. value never null.
+  // this should only be EXTERNAL if externalAvailable is true
+  private final MutableLiveData<DeviceSelection> mDeviceSelection =
+    new MutableLiveData<>(DeviceSelection.INTERNAL);
+  
+  public LiveData<DeviceSelection> getDeviceSelection() {
+    return mDeviceSelection;
+  }
+  
+  
+  // wrapper that handles opening and closing a device. represents currently selected external
+  // device, if any
+  private @Nullable Device mDevice = null;
+  
   
   
   
   /**
-   * Livedata getters only needed for infos list and current device info
-   */
-  public LiveData<List<MidiDeviceInfo>> getInfos() {
-    return mInfos;
-  }
-  
-  public LiveData<MidiDeviceInfo> getCurrInfo() {
-    return mCurrInfo;
-  }
-  
-  
-  /**
-   * set currently chosen device
-   */
-  public void setCurrInfo(@Nullable MidiDeviceInfo info) {
-    if (BuildConfig.DEBUG && info != null && !mInfos.getValue().contains(info)) {
-      throw new AssertionError("Assertion failed");
-    }
-    mCurrInfo.setValue(info);
-  }
-  
-  
-  /**
-   * sets up event listeners for plug-and-play and connecting to a device when currInfo is set
+   * sets up event listeners for device selection and plug-and-play
    * @param ctx only used to get midi service
    */
   private MidiConnection(Context ctx) {
     
-    // getting application context from ctx might be a better practice
-    MidiManager m = (MidiManager)ctx.getApplicationContext().getSystemService(Context.MIDI_SERVICE);
+    // getting application context from ctx might be a better practice than just using ctx
+    m = (MidiManager)ctx.getApplicationContext().getSystemService(Context.MIDI_SERVICE);
     
-    // both of these list conversions are necessary to make a mutable list. sigh...
-    mInfos.setValue(new ArrayList<>(Arrays.asList(m.getDevices())));
-    
-    
-    // TODO what should it be initially?
-    // mCurrInfo.setValue(mInfos.getValue().size() > 0 ? mInfos.getValue().get(0) : null);
-    mCurrInfo.setValue(null);
-    
-    
-    // derive device (open the device) from curr selected deviceInfo
-    mCurrInfo.observeForever(midiDeviceInfo -> {
-      // cleanup first
-      if (mCurrDevice.getValue() != null) {
-        try {
-          mCurrDevice.getValue().close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-        // must synchronously currDevice.setValue so no one writes to a closed device
-        mCurrDevice.setValue(null);
-      }
-      if (midiDeviceInfo != null) {
-        m.openDevice(midiDeviceInfo, newDevice -> {
-          if (newDevice == null) {
-            Log.e("MIDI", "could not open device " + midiDeviceInfo);
-          }
-          mCurrDevice.setValue(newDevice);
-        }, new Handler(Looper.getMainLooper()));
-      }
-    });
-    
-    
-    mCurrDevice.observeForever(midiDevice -> {
-      // cleanup first
-      if (mCurrInputPort.getValue() != null) {
-        try {
-          // is this ok if currDevice is already closed?
-          mCurrInputPort.getValue().close();
-        } catch (IOException e) {
-          Log.e("open port", Arrays.toString(e.getStackTrace()));
-        }
-        // must synchronously currInputPort.setValue
-        mCurrInputPort.setValue(null);
-      }
-      
-      if (midiDevice != null) {
-        mCurrInputPort.setValue(midiDevice.openInputPort(0));
-      }
-    });
+    // initialize state
+    onDeviceInfosChanged();
     
     // plug-n-play when new device connected, and cleanup when device disconnected
     m.registerDeviceCallback(new MidiManager.DeviceCallback() {
       public void onDeviceAdded( MidiDeviceInfo newInfo ) {
-        // new device available, notify observers
-        mInfos.getValue().add(newInfo);
-        mInfos.setValue(mInfos.getValue());
-        // mCurrInfo.setValue(newInfo);
+        onDeviceInfosChanged();
       }
       public void onDeviceRemoved( MidiDeviceInfo removedInfo ) {
-        // device removed, notify observers
-        mInfos.getValue().remove(removedInfo);
-        mInfos.setValue(mInfos.getValue());
-        
-        if (mCurrInfo.getValue() == removedInfo) {
-          // current device was removed!
-          // TODO what do we replace it with?
-          mCurrInfo.setValue(null);
-          // TODO send event?
-        }
+        onDeviceInfosChanged();
       }
     }, new Handler(Looper.getMainLooper()));
     
   }
+  
+  
+  private void onDeviceInfosChanged() {
+    DeviceSelection currSelection = mDeviceSelection.getValue();
+    MidiDeviceInfo[] newDeviceInfos = m.getDevices();
+    
+    mExternalAvailable.setValue(newDeviceInfos.length != 0);
+    
+    if (!mExternalAvailable.getValue() && currSelection == DeviceSelection.EXTERNAL) {
+      // we were set to external device, but external devices are no longer available!
+      // TODO inform ui?
+      mDeviceSelection.setValue(DeviceSelection.INTERNAL);
+    }
+  
+    // set device if different from current device
+    setDevice(mDeviceSelection.getValue() == DeviceSelection.EXTERNAL ? newDeviceInfos[0] : null);
+  }
+  
+  
+  private void onDeviceOpenFailed() {
+    mDeviceSelection.setValue(DeviceSelection.INTERNAL);
+    setDevice(null);
+  }
+  
+  
+  /**
+   * public method for ui to call
+   */
+  public void setDeviceSelection(@NotNull DeviceSelection newSelection) {
+    if (mExternalAvailable.getValue()) {
+      // if external available, let user select whatever they want
+      mDeviceSelection.setValue(newSelection);
+    } else {
+      // always set to INTERNAL
+      // if newSelection is EXTERNAL, that would be an error in request! ignore it
+      mDeviceSelection.setValue(DeviceSelection.INTERNAL);
+    }
+    
+    MidiDeviceInfo[] currDeviceInfos = m.getDevices();
+    
+    // set device if different from current device
+    setDevice(mDeviceSelection.getValue() == DeviceSelection.EXTERNAL ? currDeviceInfos[0] : null);
+  }
+  
+  
+  
+  private void setDevice(@Nullable MidiDeviceInfo info) {
+    // lots of cases: mDevice is nullable, info is nullable, mDevice.mInfo may or may not equal info
+    if (mDevice == null) {
+      mDevice = info == null ? null : new Device(info);
+      return;
+    }
+    if (!mDevice.mInfo.equals(info)) {
+      mDevice.close();
+      mDevice = info == null ? null : new Device(info);
+    }
+    // do nothing if mDevice existed and its info equaled info
+  }
+  
+  
+  
+  
+  
+  /**
+   * encapsulating wrapper around opening a device
+   */
+  private class Device implements Closeable {
+    public final @NotNull MidiDeviceInfo mInfo;
+    public @Nullable MidiDevice mDevice;
+    public @Nullable MidiInputPort mPort;
+  
+    // public Device from(@Nullable MidiDeviceInfo info) {
+    //   return info == null ? null : new Device(info);
+    // }
+    private Device(@NotNull MidiDeviceInfo info) {
+      mInfo = info;
+      
+      m.openDevice(info, newDevice -> {
+        if (newDevice == null) {
+          Log.e("MIDI", "could not open device " + info);
+          onDeviceOpenFailed();
+          return;
+        }
+        mDevice = newDevice;
+        mPort = mDevice.openInputPort(0);
+      }, new Handler(Looper.getMainLooper()));
+      
+    }
+    
+    public void close() {
+      if (mPort != null) tryClose(mPort);
+      if (mDevice != null) tryClose(mDevice);
+    }
+    private void tryClose(Closeable resource) {
+      try {
+        resource.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  
+  
+  
+  
+  
   
   
   /**
@@ -181,7 +226,11 @@ public class MidiConnection {
    * @param velocity 0-127
    */
   public void sendNoteOn(int pitch, int velocity) {
-    if (mCurrInputPort.getValue() != null) {
+    if (mDeviceSelection.getValue() == DeviceSelection.INTERNAL) {
+      // TODO play internal synth
+    } else if (mDevice != null && mDevice.mPort != null) {
+      // selection is EXTERNAL and port is available
+      
       byte[] buffer = new byte[4];
       int numBytes = 0;
       
@@ -195,11 +244,10 @@ public class MidiConnection {
       int offset = 0;
       // post is non-blocking
       try {
-        mCurrInputPort.getValue().send(buffer, offset, numBytes);
+        mDevice.mPort.send(buffer, offset, numBytes);
       } catch (IOException e) {
         Log.e("send midi", Arrays.toString(e.getStackTrace()));
       }
-    
     }
   }
   
