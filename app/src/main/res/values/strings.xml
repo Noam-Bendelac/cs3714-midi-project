@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">MIDI Project</string>
+    <string name="instructions1">
+        You may choose to use this app\'s internal synthesizer for standalone use, or connect to a
+        computer running a MIDI synthesizer through USB.
+    </string>
+    <string name="instructions2">
+        If you wish to connect to your computer, after plugging in your USB, tap the USB connection
+        notification on your phone and select \"Use device as MIDI\". In your digital audio
+        workstation, find and connect to this phone\'s MIDI device listing. You may need to follow
+        more instructions in your DAW.  On your phone, tap \"Test Note\" on the right to test your
+        connection. When in doubt, try unplugging and plugging back in.
+    </string>
 </resources>
