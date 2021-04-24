@@ -10,6 +10,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -51,6 +53,11 @@ public class DrumpadFragment extends Fragment {
         
         
         setupUI(root);
+        
+        // uncomment to attempt to connect to external, just for testing. TODO remove
+        // new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        //     mMidiConnection.setDeviceSelection(MidiConnection.DeviceSelection.EXTERNAL);
+        // }, 2000);
         
         return root;
     }

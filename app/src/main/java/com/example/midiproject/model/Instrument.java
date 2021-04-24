@@ -86,23 +86,22 @@ public abstract class Instrument {
     
     // 16 Different note sounds
     private final int[] AUDIO_FILES = {
-      // TODO replace these with actual drum sounds
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
+      R.raw.drum_crash,
+      R.raw.drum_splash,
+      R.raw.drum_ride,
+      R.raw.drum_hat_open,
+      R.raw.drum_tom_hi,
+      R.raw.drum_tom_mid,
+      R.raw.drum_tom_lo,
+      R.raw.drum_tom_floor,
+      R.raw.drum_snare_rim,
+      R.raw.drum_snare_hit,
+      R.raw.drum_hat_half,
+      R.raw.drum_hat_pedal,
+      R.raw.drum_snare_side,
+      R.raw.drum_kick_1,
+      R.raw.drum_hat_closed,
+      R.raw.drum_kick_2,
     };
     
     // the midi pitch of each of the above files
