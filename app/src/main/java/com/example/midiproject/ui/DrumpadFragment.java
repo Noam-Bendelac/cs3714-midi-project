@@ -63,18 +63,15 @@ public class DrumpadFragment extends Fragment {
     }
     
     
-    @SuppressLint("ClickableViewAccessibility")
     @SuppressWarnings("SetTextI18n")
     private void setupUI(View root) {
         // apply note pitches to buttons
-    
-        GridLayout gridLayout = root.findViewById(R.id.gridLayout);
-    
+        
         int[] pitches = Instrument.DRUMS.getValidPitches();
     
+        GridLayout gridLayout = root.findViewById(R.id.gridLayout);
         // remove all buttons first, in case there already are some from a previous update
         gridLayout.removeAllViews();
-    
         // there should always be 16 notes, but just in case:
         gridLayout.setColumnCount((int) Math.ceil(Math.sqrt(pitches.length)));
     
@@ -89,6 +86,8 @@ public class DrumpadFragment extends Fragment {
         
             // create a button with the proper callbacks (onTouch)
             gridLayout.addView(new AppCompatButton(ctx) {{
+                // double brace initialization means we are extending AppCompatButton
+                
                 // this is for making the button fill the grid cells
                 // source: https://stackoverflow.com/a/57315186/
                 setLayoutParams(new GridLayout.LayoutParams(
@@ -99,23 +98,8 @@ public class DrumpadFragment extends Fragment {
                 setText(Note.pitchToString(pitch));
                 setGravity(Gravity.END | Gravity.BOTTOM);
             
-                // TODO move the listener to some other class for reuse
-                setOnTouchListener((v, event) -> {
-                    switch (event.getActionMasked()) {
-                        case MotionEvent.ACTION_DOWN:
-                        case MotionEvent.ACTION_POINTER_DOWN:
-                            mMidiConnection.sendNoteOn(pitch, 127);
-                            setPressed(true);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                        case MotionEvent.ACTION_POINTER_UP:
-                        case MotionEvent.ACTION_CANCEL:
-                            mMidiConnection.sendNoteOff(pitch);
-                            setPressed(false);
-                            break;
-                    }
-                    return true;
-                });
+                // `this` is a reference to the button, to set the "pressed" style
+                setOnTouchListener(new KeyTouchListener(pitch, this));
             }});
         }
     }
