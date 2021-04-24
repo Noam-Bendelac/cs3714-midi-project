@@ -18,6 +18,21 @@ public class MidiPlayer {
     // 16 Different note sounds
     static final int[] AUDIO_FILES = {
         R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
+        R.raw.piano_c,
         // TODO there will be NUM_NOTES files
     };
     
@@ -75,7 +90,8 @@ public class MidiPlayer {
      */
     private static int midiPitchToNoteNum(int pitch) {
         int noteNum = pitch - 60;
-        if (noteNum < 0 || noteNum >= NUM_NOTES) {
+        // if (noteNum < 0 || noteNum >= NUM_NOTES) {
+        if (noteNum < 0) {
             throw new IllegalArgumentException("Invalid midi pitch " + pitch);
         }
         return noteNum;
