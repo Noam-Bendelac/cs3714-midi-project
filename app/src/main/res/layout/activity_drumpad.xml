@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/drumpadFragment"
-        android:name="com.example.midiproject.ui.drumpadFragment"
+        android:name="com.example.midiproject.ui.DrumpadFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="250dp"

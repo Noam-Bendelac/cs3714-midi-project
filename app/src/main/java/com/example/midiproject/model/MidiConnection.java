@@ -274,4 +274,14 @@ public class MidiConnection {
   }
   
   
+  /**
+   * set the instrument of the internal synth
+   * TODO must set this at the start of the keyboard and drumpad pages
+   * @param instrument PIANO or DRUMS
+   */
+  public void setInstrument(@NotNull Instrument instrument) {
+    mInternalPlayer.setInstrument(instrument);
+  }
+  
+  
 }
