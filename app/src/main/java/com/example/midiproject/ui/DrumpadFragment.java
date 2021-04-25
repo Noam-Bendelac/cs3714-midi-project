@@ -1,23 +1,17 @@
 package com.example.midiproject.ui;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.GridLayout;
 
 import com.example.midiproject.R;
@@ -25,23 +19,37 @@ import com.example.midiproject.model.Instrument;
 import com.example.midiproject.model.MidiConnection;
 import com.example.midiproject.model.Note;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * A fragment that holds the buttons for the drumpad activity
  */
 public class DrumpadFragment extends Fragment {
     
-    private MidiConnection mMidiConnection;
+    // names of the drum pads
+    private static final String[] DRUM_NAMES = {
+        "Crash",
+        "Splash",
+        "Ride",
+        "Open\nHat",
+        "Hi Tom",
+        "Mid Tom",
+        "Lo Tom",
+        "Floor\nTom",
+        "Snare\nRim",
+        "Snare\nHit",
+        "Half\nHat",
+        "Pedal\nHat",
+        "Snare\nSide",
+        "Kick 1",
+        "Closed\nHat",
+        "Kick 2",
+    };
     
     
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMidiConnection = MidiConnection.getInstance(getContext());
-        mMidiConnection.setInstrument(Instrument.DRUMS);
+        MidiConnection.getInstance(getContext()).setInstrument(Instrument.DRUMS);
     }
 
     
@@ -50,9 +58,10 @@ public class DrumpadFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_drumpad, container, false);
-        
-        
+    
+    
         setupUI(root);
+        
         
         // uncomment to attempt to connect to external, just for testing. TODO remove
         // new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -83,6 +92,8 @@ public class DrumpadFragment extends Fragment {
             int col = idx % gridLayout.getColumnCount();
         
             int pitch = pitches[idx];
+            
+            String name = DRUM_NAMES[idx];
         
             // create a button with the proper callbacks (onTouch)
             gridLayout.addView(new AppCompatButton(ctx) {{
@@ -95,7 +106,13 @@ public class DrumpadFragment extends Fragment {
                   GridLayout.spec(col, 1F)
                 ));
             
-                setText(Note.pitchToString(pitch));
+                // uncomment to set text to note name like "C#4"
+                // setText(Note.pitchToString(pitch));
+                setText(name);
+                
+                setAllCaps(false);
+                setLineSpacing(0, 0.9f);
+                setPadding(24, 24, 24, 20);
                 setGravity(Gravity.END | Gravity.BOTTOM);
             
                 // `this` is a reference to the button, to set the "pressed" style

@@ -8,16 +8,22 @@
     tools:context=".ui.DrumpadFragment">
 
 
-    <GridLayout
-        android:id="@+id/gridLayout"
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="128dp"
+        android:layout_marginEnd="128dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!--    Will get filled in dynamically    -->
-    </GridLayout>
-    
+        <GridLayout
+            android:id="@+id/gridLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!--    Will get filled in dynamically    -->
+        </GridLayout>
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
