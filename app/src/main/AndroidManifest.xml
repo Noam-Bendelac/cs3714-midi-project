@@ -14,11 +14,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MIDIProject">
         <activity
-            android:name=".ui.SetupActivity"
-            android:screenOrientation="sensorLandscape">
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MIDIProject.NoActionBar">
 
             <intent-filter>
-                <!--https://stackoverflow.com/questions/25219551/what-is-the-meaning-of-android-intent-action-main-->
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
