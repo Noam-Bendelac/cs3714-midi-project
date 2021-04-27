@@ -11,4 +11,5 @@
         more instructions in your DAW.  On your phone, tap \"Test Note\" on the right to test your
         connection. When in doubt, try unplugging and plugging back in.
     </string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
