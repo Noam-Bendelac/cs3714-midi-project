@@ -7,21 +7,49 @@ import com.example.midiproject.R;
  */
 public abstract class Instrument {
   
+  
+  /**
+   * @return number of notes on the keyboard/drumpad.
+   * implement this getter in a subclass to return NUM_NOTES
+   */
+  // private static final int NUM_NOTES = 8;
+  public abstract int getNumNotes();
+  
+  
+  /**
+   * implement this getter in a subclass to return an array AUDIO_FILES,
+   * with indices matching the indices of getValidPitches() and length getNumNotes()
+   */
+  // protected final int[] AUDIO_FILES;
+  protected abstract int[] getAudioFiles();
+  
+  
+  /**
+   *
+   * @return array of valid midi pitches that SHOULD NOT BE MODIFIED (if only java had a feature to
+   * enforce that...) with length getNumNotes()
+   * implement this getter in a subclass to return an array MIDI_PITCHES
+   */
+  // protected final int[] MIDI_PITCHES;
+  public abstract int[] getValidPitches();
+  
+  
   /**
    *
    * @param pitch midi pitch 0-127
    * @return audio file resource id, or AUDIO_RES_NONE
    */
-  public abstract int pitchToAudioFile(int pitch);
-  
-  
-  /**
-   * 
-   * @return array of valid midi pitches that SHOULD NOT BE MODIFIED (if only java had a feature to
-   * enforce that...)
-   */
-  public abstract int[] getValidPitches();
-  
+  public int pitchToAudioFile(int pitch) {
+    int numNotes = getNumNotes();
+    int[] midiPitches = getValidPitches();
+    int[] audioFiles = getAudioFiles();
+    for (int i = 0; i < numNotes; i++) {
+      if (midiPitches[i] == pitch) {
+        return audioFiles[i];
+      }
+    }
+    return AUDIO_RES_NONE;
+  }
   
   
   
@@ -34,55 +62,68 @@ public abstract class Instrument {
   
   public static Instrument PIANO = new Instrument() {
   
-    // Number of notes on the keyboard. TODO this might change
-    private static final int NUM_NOTES = 16;
+    // Number of notes on the keyboard.
+    private static final int NUM_NOTES = 8;
+    @Override
+    public int getNumNotes() {
+      return NUM_NOTES;
+    }
     
-    // pitch of first note
-    private static final int START_PITCH = 60;
-  
     // 16 Different note sounds
     private final int[] AUDIO_FILES = {
       R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
-      R.raw.piano_c,
+      R.raw.piano_d,
+      R.raw.piano_e,
+      R.raw.piano_f,
+      R.raw.piano_g,
+      R.raw.piano_a,
+      R.raw.piano_b,
+      // TODO change octave
       R.raw.piano_c,
     };
+    @Override
+    protected int[] getAudioFiles() {
+      return AUDIO_FILES;
+    }
+    
+    
+    // the midi pitch of each of the above files
+    // TODO this is the major scale for now. if we add black keys, this would just be 60, 61, 62, 63...
+    private final int[] MIDI_PITCHES = {
+      60,
+      62,
+      64,
+      65,
+      67,
+      69,
+      71,
+      72,
+    };
+    @Override
+    public int[] getValidPitches() {
+      return MIDI_PITCHES;
+    }
     
     @Override
     public int pitchToAudioFile(int pitch) {
-      int noteNum = pitch - START_PITCH;
-      if (noteNum < 0 || noteNum >= NUM_NOTES) {
-        return AUDIO_RES_NONE;
-      }
-      return AUDIO_FILES[noteNum];
-    }
-  
-    @Override
-    public int[] getValidPitches() {
-      int[] ret = new int[NUM_NOTES];
       for (int i = 0; i < NUM_NOTES; i++) {
-        ret[i] = START_PITCH + i;
+        if (MIDI_PITCHES[i] == pitch) {
+          return AUDIO_FILES[i];
+        }
       }
-      return ret;
+      return AUDIO_RES_NONE;
     }
+    
   };
   
   public static Instrument DRUMS = new Instrument() {
-  
+    
     // Number of notes on the drumpad
     private static final int NUM_NOTES = 16;
+    @Override
+    public int getNumNotes() {
+      return NUM_NOTES;
+    }
     
     // 16 Different note sounds
     private final int[] AUDIO_FILES = {
@@ -103,6 +144,10 @@ public abstract class Instrument {
       R.raw.drum_hat_closed,
       R.raw.drum_kick_2,
     };
+    @Override
+    protected int[] getAudioFiles() {
+      return AUDIO_FILES;
+    }
     
     // the midi pitch of each of the above files
     // this is a standard called General Midi:
@@ -130,6 +175,10 @@ public abstract class Instrument {
       42,
       35,
     };
+    @Override
+    public int[] getValidPitches() {
+      return MIDI_PITCHES;
+    }
     
     @Override
     public int pitchToAudioFile(int pitch) {
@@ -140,11 +189,7 @@ public abstract class Instrument {
       }
       return AUDIO_RES_NONE;
     }
-  
-    @Override
-    public int[] getValidPitches() {
-      return MIDI_PITCHES;
-    }
+    
   };
   
   

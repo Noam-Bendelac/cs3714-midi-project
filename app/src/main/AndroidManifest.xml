@@ -14,24 +14,37 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MIDIProject">
         
-        <!-- uncomment for setup activity (change this when we implement navigation) -->
-<!--        <activity-->
-<!--            android:name=".ui.SetupActivity"-->
-<!--            android:screenOrientation="sensorLandscape">-->
-<!--            -->
+        <activity
+            android:name=".ui.SetupActivity"
+            android:screenOrientation="sensorLandscape">
+            
+            <!-- uncomment for setup activity (change this when we implement navigation) -->
 <!--            <intent-filter>-->
 <!--                &lt;!&ndash;https://stackoverflow.com/questions/25219551/what-is-the-meaning-of-android-intent-action-main&ndash;&gt;-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
-<!--        </activity>-->
+        </activity>
 
-        <!-- uncomment for drumpad activity (change this when we implement navigation) -->
         <activity
             android:name=".ui.DrumpadActivity"
             android:screenOrientation="sensorLandscape">
 
+            <!-- uncomment for drumpad activity (change this when we implement navigation) -->
+<!--            <intent-filter>-->
+<!--                &lt;!&ndash;https://stackoverflow.com/questions/25219551/what-is-the-meaning-of-android-intent-action-main&ndash;&gt;-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+
+        <activity
+            android:name=".ui.KeyboardActivity"
+            android:screenOrientation="sensorLandscape">
+
+            <!-- uncomment for keyboard activity (change this when we implement navigation) -->
             <intent-filter>
                 <!--https://stackoverflow.com/questions/25219551/what-is-the-meaning-of-android-intent-action-main-->
                 <action android:name="android.intent.action.MAIN" />
