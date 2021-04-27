@@ -40,6 +40,7 @@ public class MetronomeFragment extends Fragment implements View.OnClickListener 
 
     private void stopMetronome() {
         delay = 0;
+        myAsyncTask.cancel(true);
     }
 
     private void playMetronome(int bpm) {
