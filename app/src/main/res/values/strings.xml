@@ -11,4 +11,7 @@
         more instructions in your DAW.  On your phone, tap \"Test Note\" on the right to test your
         connection. When in doubt, try unplugging and plugging back in.
     </string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 </resources>

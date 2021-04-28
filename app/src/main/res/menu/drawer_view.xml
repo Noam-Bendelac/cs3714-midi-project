@@ -3,16 +3,16 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_keyboard"
-            android:title="First" />
+            android:title="Keyboard" />
 <!--        commenting out the icons for now: -->
 <!--            android:icon="@drawable/ic_one"-->
         <item
             android:id="@+id/nav_drumpad"
-            android:title="Second" />
+            android:title="Drum Pad" />
 <!--            android:icon="@drawable/ic_two"-->
         <item
             android:id="@+id/nav_setup"
-            android:title="Third" />
+            android:title="Setup" />
 <!--            android:icon="@drawable/ic_three"-->
     </group>
 </menu>

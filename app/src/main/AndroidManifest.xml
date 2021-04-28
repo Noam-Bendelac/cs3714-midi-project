@@ -15,7 +15,9 @@
         android:theme="@style/Theme.MIDIProject">
         
         
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <!--https://stackoverflow.com/questions/25219551/what-is-the-meaning-of-android-intent-action-main-->
                 <action android:name="android.intent.action.MAIN" />

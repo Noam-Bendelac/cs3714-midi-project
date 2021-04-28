@@ -12,5 +12,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <!-- for toolbar hamburger menu color i think -->
+        <item name="colorControlNormal">@color/white</item>
     </style>
+
 </resources>
