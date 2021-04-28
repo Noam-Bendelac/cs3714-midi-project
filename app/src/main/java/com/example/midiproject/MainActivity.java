@@ -8,6 +8,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -36,14 +37,40 @@ public class MainActivity extends AppCompatActivity {
     
     // This will display an Up icon (<-), we will replace it with hamburger later
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     
     // Find our drawer view
     mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-  
+    drawerToggle = setupDrawerToggle();
+    drawerToggle.setDrawerIndicatorEnabled(true);
+    drawerToggle.syncState();
+    mDrawer.addDrawerListener(drawerToggle);
+
+
     // Find our drawer view
     nvDrawer = (NavigationView) findViewById(R.id.nvView);
     // Setup drawer view
     setupDrawerContent(nvDrawer);
+  }
+
+  private ActionBarDrawerToggle setupDrawerToggle() {
+    // NOTE: Make sure you pass in a valid toolbar reference.  ActionBarDrawToggle() does not require it
+    // and will not render the hamburger icon without it.
+    return new ActionBarDrawerToggle(this, mDrawer, mToolbar, R.string.drawer_open,  R.string.drawer_close);
+  }
+
+  @Override
+  protected void onPostCreate(Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    // Sync the toggle state after onRestoreInstanceState has occurred.
+    drawerToggle.syncState();
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    // Pass any configuration change to the drawer toggles
+    drawerToggle.onConfigurationChanged(newConfig);
   }
   
   private void setupDrawerContent(NavigationView navigationView) {
@@ -107,4 +134,6 @@ public class MainActivity extends AppCompatActivity {
     
     return super.onOptionsItemSelected(item);
   }
+
+
 }
