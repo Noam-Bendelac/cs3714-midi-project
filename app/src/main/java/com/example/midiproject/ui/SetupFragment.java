@@ -1,8 +1,10 @@
 package com.example.midiproject.ui;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.os.Bundle;
 
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -37,6 +39,13 @@ public class SetupFragment extends Fragment {
     View root = inflater.inflate(R.layout.fragment_setup, container, false);
     
     // TODO we may or may not need a ViewModel for persistence
+  
+    DrawerLayout drawer = root.findViewById(R.id.drawerLayout);
+    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+  
+    // slightly darker color for left side
+    drawer.setScrimColor(Color.argb(10, 0, 0, 0));
+    
     
     // RadioGroup radioGroup = root.findViewById(R.id.radioGroup);
     RadioButton radioButtonExternal = root.findViewById(R.id.radioButtonExternal);
@@ -45,7 +54,7 @@ public class SetupFragment extends Fragment {
     
     MidiConnection connection = MidiConnection.getInstance(getContext());
     
-    connection.getExternalAvailable().observe(this, externalAvailable -> {
+    connection.getExternalAvailable().observe(getViewLifecycleOwner(), externalAvailable -> {
       radioButtonExternal.setEnabled(externalAvailable);
     });
     
@@ -61,7 +70,7 @@ public class SetupFragment extends Fragment {
     // });
     radioButtonInternal.setOnClickListener(v -> connection.setDeviceSelection(MidiConnection.DeviceSelection.INTERNAL));
     radioButtonExternal.setOnClickListener(v -> connection.setDeviceSelection(MidiConnection.DeviceSelection.EXTERNAL));
-    connection.getDeviceSelection().observe(this, deviceSelection -> {
+    connection.getDeviceSelection().observe(getViewLifecycleOwner(), deviceSelection -> {
       RadioButton selected = deviceSelection == MidiConnection.DeviceSelection.INTERNAL
         ? radioButtonInternal
         : radioButtonExternal;
